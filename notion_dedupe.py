@@ -124,6 +124,7 @@ def archive_page(page_id):
 def main():
     parser = argparse.ArgumentParser(description="Notion 苹果笔记数据库去重脚本")
     parser.add_argument("--dry-run", action="store_true", help="仅预览，不实际执行归档")
+    parser.add_argument("--auto", action="store_true", help="自动执行，无需确认（用于 CI/CD）")
     args = parser.parse_args()
     
     print("🔍 正在查询苹果笔记同步数据库...")
@@ -163,13 +164,13 @@ def main():
         print(f"🔍 [DRY-RUN] 预览模式，共 {total_to_remove} 条记录将被归档，但不会实际执行")
         return
     
-    # 确认删除
-    print(f"⚠️  将归档 {total_to_remove} 条重复记录")
-    confirm = input("确认执行? (y/N): ").strip().lower()
-    
-    if confirm != 'y':
-        print("❌ 已取消")
-        return
+    # 自动模式（CI/CD）或交互确认
+    if not args.auto:
+        print(f"⚠️  将归档 {total_to_remove} 条重复记录")
+        confirm = input("确认执行? (y/N): ").strip().lower()
+        if confirm != 'y':
+            print("❌ 已取消")
+            return
     
     # 执行归档
     print("\n🗑️  正在归档重复记录...")
